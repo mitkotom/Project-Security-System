@@ -1,0 +1,60 @@
+#include <LiquidCrystal.h>  //Избираме използването на LiquadCrystal библиотеката
+
+
+int UltrasonicSensor = 6;  //UltrasonicSensor var is for Ultrasonic Sensor
+int SecurityAlarm = 13;  //SecurityAlarm var is for Security Alarm
+long duration; // Създаваме променлива от тип long с име "duration"
+long distance; //Създаваме променлива от тип long с име "distance"
+
+
+ 
+  
+  LiquidCrystal lcd(12, 11, 5, 4, 3, 2); //Избираме пиновете към които искаме да свържем ЛСД дисплей-я.
+
+void setup() //Setup
+{
+  Serial.begin(9600); //Изписва разстоянието в конзолата
+  pinMode(SecurityAlarm, OUTPUT);
+  lcd.begin(16, 2);
+}
+
+void loop()//Цикъл , който се върти от тип void 
+{
+  
+  //Ултрасоник сензора изпраща информацията
+  pinMode(UltrasonicSensor, OUTPUT);
+  digitalWrite(UltrasonicSensor, LOW);
+  digitalWrite(UltrasonicSensor, HIGH);
+  digitalWrite(UltrasonicSensor, LOW);
+  //Ултрасоник сензора получава данните 
+  pinMode(UltrasonicSensor, INPUT);
+  //Изчислява разтоянието
+  duration = pulseIn(UltrasonicSensor, HIGH);
+  distance = duration*0.034/2;
+  //Принтира разтоянието в конзолата
+  Serial.print("Distance: ");
+  Serial.print(distance);
+  Serial.print("cm");
+  Serial.println();
+  
+  if(distance < 300) //Създава се условие , ако дистанцията е по-малка от 300 сантиметра.
+  {
+    lcd.clear();  //Изчиства се отпечатаното съобщение.
+    lcd.setCursor(0, 0);  //Избираме , на коя позиция и на кой ред , искаме да се отпечата съобщението.
+    digitalWrite(SecurityAlarm, HIGH); //Охранителната система се включва.
+    lcd.print("Target detected");  //Изписва се на дисплей-а , желаното съобщение.
+    lcd.setCursor(5, 1);  //Избираме , на коя позиция и на кой ред , искаме да се отпечата съобщението.
+    lcd.print(distance); //Принтира се на дисплей-а , променливата "distance".
+    lcd.print(" cm"); //Изписва се на дисплей-а , желаното съобщение.
+    delay(500); //Изчаква се половин секунда.
+  }
+  
+  if(distance > 300) //Създава се условие , ако дистанцията е по-голяма от 300 сантиметра.
+  {
+    lcd.clear(); //Изчиства се отпечатаното съобщение.
+    lcd.setCursor(5, 0); //Избираме , на коя позиция и на кой ред , искаме да се отпечата съобщението.
+    digitalWrite(SecurityAlarm, LOW); //Охранителната система се изключва.
+    lcd.print("Safe"); //Изписва се на дисплей-а , желаното съобщение.
+    delay(500); //Изчаква се половин секунда.
+  }
+}
